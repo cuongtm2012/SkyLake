@@ -36,8 +36,8 @@ app.use(myConnection(mysql, dbOptions, 'pool'));
 var port = process.env.PORT || 4000;
 app.use('/sms', smsRoutes);
 
-cron.schedule('5 * * * * *', () => {
-  console.log('running a task every two minutes');
+cron.schedule('*/2 * * * *', () => {
+  console.log('========== SKYLAKE JOB ==========');
   jobSMS.start(pool);
 });
 

@@ -18,7 +18,7 @@ module.exports = class smsDb {
         console.log('---------GET TOKEN------------');
         fpt_token = response.data.access_token;
         console.log(fpt_token);
-        db.query('SELECT MSGKEY, COMPKEY, ID, PHONE, CALLBACK, STATUS, WRTDATE, REQDATE, RSLTDATE, REPORTDATE, TERMINATEDDATE, EXPIRETIME, RSLT, MSG, `TYPE`, SENDCNT, SENTDATE, TELCOINFO, ETC1, ETC2, ETC3, ETC4 FROM SMS_MSG.SMSMSG WHERE STATUS = 0 OR RSLT != 06 ORDER BY REQDATE', (err, result, fields) => {
+        db.query('SELECT MSGKEY, COMPKEY, ID, PHONE, CALLBACK, STATUS, WRTDATE, REQDATE, RSLTDATE, REPORTDATE, TERMINATEDDATE, EXPIRETIME, RSLT, MSG, `TYPE`, SENDCNT, SENTDATE, TELCOINFO, ETC1, ETC2, ETC3, ETC4 FROM skylakecc_erp.sms_msg WHERE STATUS = 0 OR RSLT != 06 ORDER BY REQDATE', (err, result, fields) => {
           if (err) {
             console.log(err);
             return;
@@ -61,8 +61,10 @@ module.exports = class smsDb {
                     console.log(msgkey);
                     console.log(phone);
 
+                    var table_monthly = d.getFullYear().toString() + ((d.getMonth() + 1).toString().length == 2 ? (d.getMonth() + 1).toString() : "0" + (d.getMonth() + 1).toString());
+
                     // update SMSMSG table
-                    db.query('UPDATE SMS_MSG.SMSMSG SET STATUS = 3, RSLT = 06, RSLTDATE = ? WHERE MSGKEY = ? AND PHONE = ?',
+                    db.query('UPDATE skylakecc_erp.sms_msg SET STATUS = 3, RSLT = 06, RSLTDATE = ? WHERE MSGKEY = ? AND PHONE = ?',
                       [rsldate, msgkey, phone], (err, result, fields) => {
                         if (err) {
                           console.log(err);
@@ -72,6 +74,29 @@ module.exports = class smsDb {
                           console.log('Update Successfully!!!!');
                         }
                       });
+                    // insert into SMS monthly
+                    db.query('SELECT MSGKEY skylakecc_erp.sms_log_' + table_monthly, (err, result, fields) => {
+                      if (err) {
+                        db.query('create table sms_log_' + table_monthly + ' as select * from sms_msg where 1=0;', (err, result, fields) => {
+                          db.query('insert into sms_log_' + table_monthly + ' select * from sms_msg WHERE MSGKEY = ? AND PHONE = ?', [msgkey, phone] , (err, result, fields) => {
+                            if (err) {
+                              console.log(err);
+                              return;
+                            }
+                            console.log('Import to Log successfully!');
+                          });
+                        });
+                      }
+                    });
+
+                    // delete data from SMS_MSG
+                    db.query('DELETE FROM skylakecc_erp.sms_msg WHERE MSGKEY = ? AND PHONE = ?', [msgkey, phone], (err, result, fields) => {
+                      if (err) {
+                        console.log(err);
+                        return;
+                      }
+                      console.log('Delete data from sms_msg Successfully!!!!');
+                    });
                   })
                   .catch(function (error) {
                     console.log(error);
