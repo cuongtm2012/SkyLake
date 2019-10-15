@@ -9,16 +9,19 @@ import { IndexComponent } from './components/index/index.component';
 import { SendSmsService } from './service/sendSms.service';
 import { appRoutes } from './config/routerConfig';
 import { EnvService } from './service/env.service';
+import { CreateComponent } from './components/create/create.component';
+import { ValidationUtilService } from './service/validation-util.service';
 
 @NgModule({
   declarations: [
     AppComponent,
-    IndexComponent
+    IndexComponent,
+    CreateComponent
   ],
   imports: [
     BrowserModule, RouterModule.forRoot(appRoutes), HttpClientModule, ReactiveFormsModule
   ],
-  providers: [SendSmsService, EnvService],
+  providers: [SendSmsService, EnvService, ValidationUtilService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

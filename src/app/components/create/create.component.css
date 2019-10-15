@@ -1,0 +1,28 @@
+table,
+th,
+td {
+  border: 1px solid black;
+}
+
+td {
+  width: 100px;
+  text-align: center;
+}
+
+table {
+  margin-top: 10%;
+  width: 100%;
+}
+
+input {
+    text-align: center;
+}
+
+.btnSubmit {
+    text-align: center;
+}
+
+.divSubmit {
+    margin: 2%;
+    text-align: center;
+}

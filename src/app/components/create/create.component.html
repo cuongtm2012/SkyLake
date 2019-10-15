@@ -1,0 +1,24 @@
+<form [formGroup]="angForm"
+  (ngSubmit)="onClickSubmit(second.value, minute.value, hour.value, dayofmonth.value, month.value, dayofweek.value)">
+  <table class="main-table">
+    <tr>
+      <td>Second</td>
+      <td>Minute</td>
+      <td>Hour</td>
+      <td>Day of month</td>
+      <td>Month</td>
+      <td>Day of week</td>
+    </tr>
+    <tr>
+      <td><input formControlName="second" #second type="text" name="second"></td>
+      <td><input formControlName="minute" #minute type="text" name="minute"></td>
+      <td><input formControlName="hour" #hour type="text" name="hour"></td>
+      <td><input formControlName="dayofmonth" #dayofmonth type="text" name="dayofmonth"></td>
+      <td><input formControlName="month" #month type="text" name="month"></td>
+      <td><input formControlName="dayofweek" #dayofweek type="text" name="day_of_week"></td>
+    </tr>
+  </table>
+  <div class="divSubmit">
+    <input class="btnSubmit" type="submit" value="Start Process" />
+  </div>
+</form>
