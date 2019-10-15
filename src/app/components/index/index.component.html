@@ -1,18 +1,45 @@
 <table class="table table-hover">
   <thead>
   <tr>
-      <td>Coin Name</td>
-      <td>Coin Price</td>
-      <td colspan="2">Actions</td>
+      <td>SMS Key</td>
+      <td>Company Key</td>
+      <td>Customer ID</td>
+      <td>Senderphone Number</td>
+      <td>Status</td>
+      <td>Registration Time</td>
+      <td>Request time</td>
+      <td>Result Time</td>
+      <td>Time of Send</td>
+      <td>Terminate Date</td>
+      <td>Expire Time</td>
+      <td>Result Status</td>
+      <td>Message</td>
+      <td>Sending MSG Type</td>
+      <td>Sending Count</td>
+      <td>Sending DateTime</td>
+      <td>Telco</td>
   </tr>
   </thead>
 
   <tbody>
-      <tr *ngFor="let coin of coins">
-          <td>{{ coin.name }}</td>
-          <td>{{ coin.price }}</td>
-          <td><a [routerLink]="['/edit', coin._id]" class="btn btn-primary">Edit</a></td>
-          <td><button (click)="deleteCoin(coin._id)"  class="btn btn-danger">Delete</button></td>
+      <tr *ngFor="let sms of smslist">
+          <td>{{ sms.MSGKEY }}</td>
+          <td>{{ sms.COMPKEY }}</td>
+          <td>{{ sms.ID }}</td>
+          <td>{{ sms.PHONE }}</td>
+          <td>{{ sms.STATUS }}</td>
+          <td>{{ sms.WRTDATE }}</td>
+          <td>{{ sms.REQDATE }}</td>
+          <td>{{ sms.RSLTDATE }}</td>
+          <td>{{ sms.REPORTDATE }}</td>
+          <td>{{ sms.TERMINATEDDATE }}</td>
+          <td>{{ sms.EXPIRETIME }}</td>
+          <td>{{ sms.RSLT }}</td>
+          <td>{{ sms.MSG }}</td>
+          <td>{{ sms.TYPE }}</td>
+          <td>{{ sms.SENDCNT }}</td>
+          <td>{{ sms.SENTDATE }}</td>
+          <td>{{ sms.TELCOINFO }}</td>
       </tr>
   </tbody>
 </table>

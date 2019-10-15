@@ -6,8 +6,6 @@ import { ReactiveFormsModule } from '@angular/forms';
 
 import { AppComponent } from './app.component';
 import { IndexComponent } from './components/index/index.component';
-import { CreateComponent } from './components/create/create.component';
-import { EditComponent } from './components/edit/edit.component';
 import { SendSmsService } from './service/sendSms.service';
 import { appRoutes } from './config/routerConfig';
 import { EnvService } from './service/env.service';
@@ -15,9 +13,7 @@ import { EnvService } from './service/env.service';
 @NgModule({
   declarations: [
     AppComponent,
-    IndexComponent,
-    CreateComponent,
-    EditComponent
+    IndexComponent
   ],
   imports: [
     BrowserModule, RouterModule.forRoot(appRoutes), HttpClientModule, ReactiveFormsModule

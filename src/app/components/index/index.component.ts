@@ -10,7 +10,7 @@ import { SendSmsService } from '../../service/sendSms.service';
 })
 export class IndexComponent implements OnInit {
 
-  coins: any;
+  smslist: any;
 
   constructor(private http: HttpClient, private service: SendSmsService) {}
 
@@ -20,13 +20,7 @@ export class IndexComponent implements OnInit {
 
   getListSms() {
     this.service.listSendSms().subscribe(res => {
-      this.coins = res;
-    });
-  }
-
-  deleteSms(id) {
-    this.service.deleteSendSms(id).subscribe(res => {
-      console.log('Deleted');
+      this.smslist = res;
     });
   }
 }
