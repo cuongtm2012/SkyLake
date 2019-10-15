@@ -9,6 +9,7 @@ var app = express();
 var mysql = require('mysql');
 var myConnection = require('express-myconnection');
 var fpt = require('./controllers/fpt');
+var cron = require('node-cron');
 app.use(bodyParser.json());
 app.use(cors());
 
@@ -35,7 +36,10 @@ app.use(myConnection(mysql, dbOptions, 'pool'));
 var port = process.env.PORT || 4000;
 app.use('/sms', smsRoutes);
 
-jobSMS.start(pool);
+cron.schedule('*/1 * * * *', () => {
+  console.log('running a task every two minutes');
+  jobSMS.start(pool);
+});
 
 var server = app.listen(port, function () {
   console.log('Listening on port ' + port);
