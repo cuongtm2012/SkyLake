@@ -5,6 +5,8 @@ var TIME_OUT = 5000;
 
 module.exports.start = function (pool) {
   setTimeout(() => {
+    console.log('Start Cron : ');
+    
     smsDB.cron(pool, (current, max) => {
       if (current == max) {
         // Finish

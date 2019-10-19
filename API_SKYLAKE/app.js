@@ -8,7 +8,6 @@ var express = require('express'),
 var app = express();
 var mysql = require('mysql');
 var myConnection = require('express-myconnection');
-var fpt = require('./controllers/fpt');
 var cron = require('node-cron');
 app.use(bodyParser.json());
 app.use(cors());
@@ -21,7 +20,7 @@ var pool = mysql.createPool({
   user: config.database.user,
   password: config.database.password,
   port: config.database.port,
-  database: config.database.database,
+  database: config.database.database
 });
 
 var dbOptions = {
@@ -36,13 +35,8 @@ app.use(myConnection(mysql, dbOptions, 'pool'));
 var port = process.env.PORT || 4000;
 app.use('/sms', smsRoutes);
 
-cron.schedule('*/2 * * * *', () => {
-  console.log('========== SKYLAKE JOB ==========');
-  jobSMS.start(pool);
-});
+jobSMS.start(pool);
 
 var server = app.listen(port, function () {
   console.log('Listening on port ' + port);
 });
-
-exports.fptsms = new fpt();
