@@ -4,6 +4,7 @@ var axios = require('axios');
 module.exports = class smsDb {
   // Cron job notification
   cron(db, onComplete) {
+    var target = [];
     db.query('SELECT MSGKEY, COMPKEY, ID, PHONE, CALLBACK, STATUS, WRTDATE, REQDATE, RSLTDATE, REPORTDATE, TERMINATEDDATE, EXPIRETIME, RSLT, MSG, `TYPE`, SENDCNT, SENTDATE, TELCOINFO, ETC1, ETC2, ETC3, ETC4 FROM sms_msg WHERE STATUS = 0 OR RSLT != 06 ORDER BY REQDATE', (err, result, fields) => {
       if (err) {
         console.log(err);
@@ -14,36 +15,45 @@ module.exports = class smsDb {
         console.log('Empty value');
         onComplete(0, 0);
         return;
+      } else {
+        result.forEach(sms => {
+          var currentTime = new Date().getTime();
+          console.log('-- CURRENT TIME :' + currentTime);
+          var requestDate = new Date(sms.REQDATE).getTime();
+          console.log('-- REQUEST TIME : ' + requestDate);
+          if (currentTime > requestDate) {
+            target.push({
+              'MSGKEY': sms.MSGKEY,
+              'PHONE': sms.PHONE,
+              'MSG': sms.MSG
+            });
+          } else {
+            onComplete(0, 0);
+          }
+        });
       }
+      if (target.length > 0) {
+        var count = 0;
+        var maxlength = target.length;
 
-      var count = 0;
-      var maxlength = result.length;
-      var fpt_token = '';
-      var body_token = {
-        "grant_type": config.TOKEN.GRANT_TYPE,
-        "client_id": config.TOKEN.CLIENT_ID,
-        "client_secret": config.TOKEN.CLIENT_SECRET,
-        "scope": config.TOKEN.SCOPE,
-        "session_id": config.TOKEN.SESSION_ID
-      };
+        var fpt_token = '';
+        var body_token = {
+          "grant_type": config.TOKEN.GRANT_TYPE,
+          "client_id": config.TOKEN.CLIENT_ID,
+          "client_secret": config.TOKEN.CLIENT_SECRET,
+          "scope": config.TOKEN.SCOPE,
+          "session_id": config.TOKEN.SESSION_ID
+        };
 
-      axios.post(config.TOKEN.URL, body_token)
-        .then(function (response) {
-          console.log('---------GET TOKEN------------');
-          fpt_token = response.data.access_token;
-          console.log(fpt_token);
-          result.forEach(sms => {
-            var msgkey = sms.MSGKEY;
-            var phone = sms.PHONE;
-            var msg = sms.MSG;
-            console.log('msgkey : ' + msgkey);
-            console.log('phone : ' + phone);
-
-            var currentTime = new Date().getTime();
-            console.log('-- CURRENT TIME :' + currentTime);
-            var requestDate = new Date(sms.REQDATE).getTime();
-            console.log('-- REQUEST TIME : ' + requestDate);
-            if (currentTime > requestDate) {
+        axios.post(config.TOKEN.URL, body_token)
+          .then(function (response) {
+            console.log('---------GET TOKEN------------');
+            fpt_token = response.data.access_token;
+            console.log(fpt_token);
+            target.forEach(sms => {
+              var msgkey = sms.MSGKEY;
+              var phone = sms.PHONE;
+              var msg = sms.MSG;
               console.log('-- SEND SMS : PHONE [' + phone + '] MESSAGE [' + msg + ']');
               // Send SMS
               var body_sms = {
@@ -56,7 +66,6 @@ module.exports = class smsDb {
               axios.post(config.SEND_SMS.URL, body_sms)
                 .then(function (response) {
                   count++;
-                  console.log(response.data);
                   var d = new Date();
                   d = new Date(d.getTime() - 3000000);
                   var rsldate = d.getFullYear().toString() + "-" + ((d.getMonth() + 1).toString().length == 2 ? (d.getMonth() + 1).toString() : "0" +
@@ -106,12 +115,15 @@ module.exports = class smsDb {
                   console.log(error);
                   onComplete(0, 0);
                 });
-            }
+
+            });
+          }).catch(function (error) {
+            console.log(error);
+            onComplete(0, 0);
           });
-        }).catch(function (error) {
-          console.log(error);
-          onComplete(0, 0);
-        });
+      } else {
+        onComplete(0, 0);
+      }
     });
   }
 };
