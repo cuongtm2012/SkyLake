@@ -7,7 +7,7 @@ module.exports = class smsDb {
   cron(db, onComplete) {
     var cskhArr = [];
     var qcArr = [];
-    db.query('SELECT MSGKEY, COMPKEY, ID, PHONE, CALLBACK, STATUS, WRTDATE, REQDATE, RSLTDATE, REPORTDATE, TERMINATEDDATE, EXPIRETIME, RSLT, MSG, `TYPE`, SENDCNT, SENTDATE, TELCOINFO, ETC1, ETC2, ETC3, ETC4 FROM sms_msg WHERE STATUS = 0 OR RSLT != 06 ORDER BY REQDATE', (err, result, fields) => {
+    db.query('SELECT MSGKEY, COMPKEY, ID, PHONE, CALLBACK, STATUS, WRTDATE, REQDATE, RSLTDATE, REPORTDATE, TERMINATEDDATE, EXPIRETIME, RSLT, MSG, `TYPE`, SENDCNT, SENTDATE, TELCOINFO, ETC1, ETC2, ETC3, ETC4 FROM skylakecc_erp.sms_msg WHERE STATUS = 0 OR RSLT != 06 ORDER BY REQDATE', (err, result, fields) => {
       if (err) {
         console.log(err);
         onComplete(0, 0);
@@ -85,7 +85,7 @@ module.exports = class smsDb {
                   var table_monthly = dateutil.dateYYYYMM();
 
                   // update SMSMSG table
-                  db.query('UPDATE sms_msg SET STATUS = 3, RSLT = 06, RSLTDATE = ? WHERE MSGKEY = ? AND PHONE = ?',
+                  db.query('UPDATE skylakecc_erp.sms_msg SET STATUS = 3, RSLT = 06, RSLTDATE = ? WHERE MSGKEY = ? AND PHONE = ?',
                     [rsldate, msgkey, phone], (err, result, fields) => {
                       if (err) {
                         console.log(err);
@@ -97,23 +97,23 @@ module.exports = class smsDb {
                     });
                   // insert into SMS monthly
 
-                  db.query('create table sms_log_' + table_monthly + ' as select * from sms_msg where 1=0;', (err, result, fields) => {
+                  db.query('create table skylakecc_erp.sms_log_' + table_monthly + ' as select * from skylakecc_erp.sms_msg where 1=0;', (err, result, fields) => {
                     if (err) {
-                      console.log('create table sms_log_' + table_monthly + ' as select * from sms_msg where 1=0;' + err);
+                      console.log('create table skylakecc_erp.sms_log_' + table_monthly + ' as select * from skylakecc_erp.sms_msg where 1=0;' + err);
                     }
-                    db.query('insert into sms_log_' + table_monthly + ' select * from sms_msg WHERE STATUS = 3 AND MSGKEY = ? AND PHONE = ?', [msgkey, phone], (err, result, fields) => {
+                    db.query('insert into skylakecc_erp.sms_log_' + table_monthly + ' select * from skylakecc_erp.sms_msg WHERE STATUS = 3 AND MSGKEY = ? AND PHONE = ?', [msgkey, phone], (err, result, fields) => {
                       if (err) {
                         console.log(err);
                         return;
                       }
-                      console.log('insert into sms_log_' + table_monthly + ' select * from sms_msg WHERE STATUS = 3 AND MSGKEY = ? AND PHONE = ? [' + msgkey + '] - [' + phone + ']');
+                      console.log('insert into skylakecc_erp.sms_log_' + table_monthly + ' select * from skylakecc_erp.sms_msg WHERE STATUS = 3 AND MSGKEY = ? AND PHONE = ? [' + msgkey + '] - [' + phone + ']');
                       // delete data from SMS_MSG
-                      db.query('DELETE FROM sms_msg WHERE STATUS = 3 AND MSGKEY = ? AND PHONE = ?', [msgkey, phone], (err, result, fields) => {
+                      db.query('DELETE FROM skylakecc_erp.sms_msg WHERE STATUS = 3 AND MSGKEY = ? AND PHONE = ?', [msgkey, phone], (err, result, fields) => {
                         if (err) {
                           console.log(err);
                           return;
                         }
-                        console.log('DELETE FROM sms_msg WHERE STATUS = 3 AND MSGKEY = ? AND PHONE = ? [' + msgkey + '] [' + phone + ']');
+                        console.log('DELETE FROM skylakecc_erp.sms_msg WHERE STATUS = 3 AND MSGKEY = ? AND PHONE = ? [' + msgkey + '] [' + phone + ']');
                       });
                     });
                   });
@@ -193,7 +193,7 @@ module.exports = class smsDb {
                           var table_monthly = dateutil.dateYYYYMM();
 
                           // update SMSMSG table
-                          db.query('UPDATE sms_msg SET STATUS = 3, RSLT = 06, RSLTDATE = ? WHERE MSGKEY = ? AND PHONE = ?',
+                          db.query('UPDATE skylakecc_erp.sms_msg SET STATUS = 3, RSLT = 06, RSLTDATE = ? WHERE MSGKEY = ? AND PHONE = ?',
                             [rsldate, msgkey, phone], (err, result, fields) => {
                               if (err) {
                                 console.log(err);
@@ -205,23 +205,23 @@ module.exports = class smsDb {
                             });
                           // insert into SMS monthly
 
-                          db.query('create table sms_log_' + table_monthly + ' as select * from sms_msg where 1=0;', (err, result, fields) => {
+                          db.query('create table skylakecc_erp.sms_log_' + table_monthly + ' as select * from skylakecc_erp.sms_msg where 1=0;', (err, result, fields) => {
                             if (err) {
-                              console.log('create table sms_log_' + table_monthly + ' as select * from sms_msg where 1=0;' + err);
+                              console.log('create table skylakecc_erp.sms_log_' + table_monthly + ' as select * from skylakecc_erp.sms_msg where 1=0;' + err);
                             }
-                            db.query('insert into sms_log_' + table_monthly + ' select * from sms_msg WHERE STATUS = 3 AND MSGKEY = ? AND PHONE = ?', [msgkey, phone], (err, result, fields) => {
+                            db.query('insert into skylakecc_erp.sms_log_' + table_monthly + ' select * from skylakecc_erp.sms_msg WHERE STATUS = 3 AND MSGKEY = ? AND PHONE = ?', [msgkey, phone], (err, result, fields) => {
                               if (err) {
                                 console.log(err);
                                 return;
                               }
-                              console.log('insert into sms_log_' + table_monthly + ' select * from sms_msg WHERE STATUS = 3 AND MSGKEY = ? AND PHONE = ? [' + msgkey + '] - [' + phone + ']');
+                              console.log('insert into skylakecc_erp.sms_log_' + table_monthly + ' select * from skylakecc_erp.sms_msg WHERE STATUS = 3 AND MSGKEY = ? AND PHONE = ? [' + msgkey + '] - [' + phone + ']');
                               // delete data from SMS_MSG
-                              db.query('DELETE FROM sms_msg WHERE STATUS = 3 AND MSGKEY = ? AND PHONE = ?', [msgkey, phone], (err, result, fields) => {
+                              db.query('DELETE FROM skylakecc_erp.sms_msg WHERE STATUS = 3 AND MSGKEY = ? AND PHONE = ?', [msgkey, phone], (err, result, fields) => {
                                 if (err) {
                                   console.log(err);
                                   return;
                                 }
-                                console.log('DELETE FROM sms_msg WHERE STATUS = 3 AND MSGKEY = ? AND PHONE = ? [' + msgkey + '] [' + phone + ']');
+                                console.log('DELETE FROM skylakecc_erp.sms_msg WHERE STATUS = 3 AND MSGKEY = ? AND PHONE = ? [' + msgkey + '] [' + phone + ']');
                               });
                             });
                           });
