@@ -28,7 +28,7 @@
     "cors": "^2.8.4",
     "express": "^4.16.2",
     "moment": "^2.24.0",
-    "mongoose": "^5.7.4",
+    "mongoose": "^5.7.5",
     "nodemon": "^1.14.11",
     "open-iconic": "^1.1.1",
     "rxjs": "^5.5.6",
