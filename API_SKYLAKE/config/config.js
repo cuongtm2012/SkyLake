@@ -9,8 +9,8 @@ var config = {
 	TOKEN: {
 		URL: 'http://app.sms.fpt.net/oauth2/token',
 		GRANT_TYPE: 'client_credentials',
-		CLIENT_ID: 'A07d0C00625988D7FAd9b9c8D684bef94Acf8a82',
-		CLIENT_SECRET: 'c5a3e767Ea06cdf73bcf303C64acae4f52a2f9ed1e130bF567f5663ae4A1dc9265af2D02',
+		CLIENT_ID: '746581b8e25a733dcc20645aa0640E24085012b4',
+		CLIENT_SECRET: 'a0fB20e297c2ab67ff6074c9219be6ddb7b96fedE7c1ae5dc1ce307ced1399c5a066f59C',
 		SCOPE_BRANDNAME_OTP: 'send_brandname_otp',
 		SCOPE_BRANDNAME : 'send_brandname',
 		SESSION_ID: 'abcde'
@@ -18,19 +18,19 @@ var config = {
 	SEND_SMS : {
 		URL: 'http://app.sms.fpt.net/api/push-brandname-otp',
 		SESSION_ID: 'abcde',
-		BRAND_NAME: 'FTI'
+		BRAND_NAME: 'skylakegolf'
 	},
 	SEND_CREATE_CAMPAIN : {
 		URL: 'http://app.sms.fpt.net/api/create-campaign',
 		SESSION_ID: 'abcde',
-		BRAND_NAME: 'FTI',
+		BRAND_NAME: 'skylakegolf',
 		CAMPAIN_NAME: 'QC_SKYLAKE',
 		QUOTA: 1
 	},
 	SEND_SMS_QC : {
 		URL: 'http://app.sms.fpt.net/api/push-brandname-ads',
 		SESSION_ID: 'abcde',
-		BRAND_NAME: 'FTI'
+		BRAND_NAME: 'skylakegolf'
 	}
 };
 
