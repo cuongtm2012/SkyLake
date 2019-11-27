@@ -15,7 +15,7 @@ app.use(cors());
 var jobSMS = require('./job-sms');
 
 var pool = mysql.createPool({
-  connectionLimit: 10,
+  connectionLimit: 100,
   host: config.database.host,
   user: config.database.user,
   password: config.database.password,
@@ -24,11 +24,11 @@ var pool = mysql.createPool({
 });
 
 var dbOptions = {
-	host: config.database.host,
-	user: config.database.user,
-	password: config.database.password,
-	port: config.database.port,
-	database: config.database.db
+  host: config.database.host,
+  user: config.database.user,
+  password: config.database.password,
+  port: config.database.port,
+  database: config.database.db
 };
 app.use(myConnection(mysql, dbOptions, 'pool'));
 
