@@ -8,15 +8,15 @@ module.exports = class smsDb {
   cron(db, onComplete) {
     var cskhArr = [];
     var qcArr = [];
-
     db.getConnection(function (err, connection) {
       if (err) {
         onComplete(0, 0);
         return;
       }
-
       connection.query('SELECT MSGKEY, COMPKEY, ID, PHONE, CALLBACK, STATUS, WRTDATE, REQDATE, RSLTDATE, REPORTDATE, TERMINATEDDATE, EXPIRETIME, RSLT, MSG, `TYPE`, SENDCNT, SENTDATE, TELCOINFO, ETC1, ETC2, ETC3, ETC4 FROM skylakecc_erp.sms_msg WHERE STATUS = 0 OR RSLT != 06 ORDER BY REQDATE', (err, result, fields) => {
-        connection.release();
+        if (db._freeConnections.indexOf(connection) < 0) {
+          connection.release();
+        }
         if (err) {
           console.log(err);
           onComplete(0, 0);
@@ -81,17 +81,16 @@ module.exports = class smsDb {
                   };
                   axios.post(config.SEND_SMS.URL, body_sms)
                     .then(function (response) {
-
                       var rsldate = dateutil.dateYYYYMMDDHHmmss();
-
                       console.log('Current date : ' + rsldate);
                       var table_monthly = dateutil.dateYYYYMM();
-
                       // update SMSMSG table
                       connection.query('UPDATE skylakecc_erp.sms_msg SET STATUS = 3, RSLT = 06, RSLTDATE = ? WHERE MSGKEY = ? AND PHONE = ?',
                         [rsldate, msgkey, phone],
                         function (err, result, fields) {
-                          connection.release();
+                          if (db._freeConnections.indexOf(connection) < 0) {
+                            connection.release();
+                          }
                           if (err) {
                             console.log(err);
                             return;
@@ -99,12 +98,13 @@ module.exports = class smsDb {
                           if (result) {
                             console.log('UPDATE skylakecc_erp.sms_msg SET STATUS = 3, RSLT = 06, RSLTDATE = ? WHERE MSGKEY = ? AND PHONE = ?' + rsldate + '-' + msgkey + '-' + phone);
                             connection.query('create table skylakecc_erp.sms_log_' + table_monthly + ' as select * from skylakecc_erp.sms_msg where 1=0;', function (err, result, fields) {
-                              connection.release();
                               if (err) {
                                 console.log('create table skylakecc_erp.sms_log_' + table_monthly + ' as select * from skylakecc_erp.sms_msg where 1=0;' + err);
                               }
                               connection.query('insert into skylakecc_erp.sms_log_' + table_monthly + ' select * from skylakecc_erp.sms_msg WHERE STATUS = 3 AND MSGKEY = ? AND PHONE = ? AND NOT EXISTS (SELECT MSGKEY FROM skylakecc_erp.sms_log_' + table_monthly + ' WHERE STATUS = 3 AND MSGKEY = ? AND PHONE = ? )', [msgkey, phone, msgkey, phone], function (err, result, fields) {
-                                connection.release();
+                                if (db._freeConnections.indexOf(connection) < 0) {
+                                  connection.release();
+                                }
                                 if (err) {
                                   console.log(err);
                                   return;
@@ -113,7 +113,9 @@ module.exports = class smsDb {
                                 // delete data from SMS_MSG
                                 connection.query('DELETE FROM skylakecc_erp.sms_msg WHERE STATUS = 3 AND MSGKEY = ? AND PHONE = ?', [msgkey, phone], function (err, result, fields) {
                                   count++;
-                                  connection.release();
+                                  if (db._freeConnections.indexOf(connection) < 0) {
+                                    connection.release();
+                                  }
                                   if (err) {
                                     console.log(err);
                                     return;
@@ -206,7 +208,9 @@ module.exports = class smsDb {
                               // update SMSMSG table
                               var updateQuery = connection.query('UPDATE skylakecc_erp.sms_msg SET STATUS = 3, RSLT = 06, RSLTDATE = ? WHERE MSGKEY = ? AND PHONE = ?',
                                 [rsldate, msgkey, phone], (err, result, fields) => {
-                                  connection.release();
+                                  if (db._freeConnections.indexOf(connection) < 0) {
+                                    connection.release();
+                                  }
                                   if (err) {
                                     console.log(err);
                                     return;
@@ -215,13 +219,17 @@ module.exports = class smsDb {
                                     console.log('UPDATE skylakecc_erp.sms_msg SET STATUS = 3, RSLT = 06, RSLTDATE = ? WHERE MSGKEY = ? AND PHONE = ?' + rsldate + '-' + msgkey + '-' + phone);
                                     // insert into SMS monthly
                                     connection.query('create table skylakecc_erp.sms_log_' + table_monthly + ' as select * from skylakecc_erp.sms_msg where 1=0;', function (err, result, fields) {
-                                      connection.release();
+                                      if (db._freeConnections.indexOf(connection) < 0) {
+                                        connection.release();
+                                      }
                                       if (err) {
                                         console.log('create table skylakecc_erp.sms_log_' + table_monthly + ' as select * from skylakecc_erp.sms_msg where 1=0;' + err);
                                       }
                                       connection.query('insert IGNORE into skylakecc_erp.sms_log_' + table_monthly + ' select * from skylakecc_erp.sms_msg WHERE STATUS = 3 AND MSGKEY = ? AND PHONE = ?', [msgkey, phone], function (err, result, fields) {
                                         isImport = true;
-                                        connection.release();
+                                        if (db._freeConnections.indexOf(connection) < 0) {
+                                          connection.release();
+                                        }
                                         if (err) {
                                           console.log(err);
                                           return;
@@ -229,7 +237,9 @@ module.exports = class smsDb {
                                         console.log('insert into skylakecc_erp.sms_log_' + table_monthly + ' select * from skylakecc_erp.sms_msg WHERE STATUS = 3 AND MSGKEY = ? AND PHONE = ? [' + msgkey + '] - [' + phone + ']');
                                         // delete data from SMS_MSG
                                         connection.query('DELETE FROM skylakecc_erp.sms_msg WHERE STATUS = 3 AND MSGKEY = ? AND PHONE = ?', [msgkey, phone], function (err, result, fields) {
-                                          connection.release();
+                                          if (db._freeConnections.indexOf(connection) < 0) {
+                                            connection.release();
+                                          }
                                           if (err) {
                                             console.log(err);
                                             return;
