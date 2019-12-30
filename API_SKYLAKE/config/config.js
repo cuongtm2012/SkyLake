@@ -1,9 +1,9 @@
 var config = {
   database: {
-    host: '1.55.215.214',
+    host: '192.168.1.5',
     user: 'skylakecc',
     password: 'skylakeccerp',
-    port: 3969,
+    port: 3307,
     database: 'skylakecc_erp'
   },
   TOKEN: {
