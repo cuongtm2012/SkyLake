@@ -29,7 +29,6 @@ module.exports = class smsDb {
           return;
         }
         if (result.length < 1) {
-          logger.info('Empty value');
           onComplete(0, 0);
           return;
         } else {
