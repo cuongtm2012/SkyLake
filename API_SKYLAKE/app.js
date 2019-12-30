@@ -3,8 +3,7 @@ var express = require('express'),
   bodyParser = require('body-parser'),
   cors = require('cors'),
   mongoose = require('mongoose'),
-  config = require('./config/config'),
-  smsRoutes = require('./route/smsRoutes');
+  config = require('./config/config');
 var app = express();
 var mysql = require('mysql');
 var myConnection = require('express-myconnection');
@@ -33,7 +32,6 @@ var dbOptions = {
 app.use(myConnection(mysql, dbOptions, 'pool'));
 
 var port = process.env.PORT || 4000;
-app.use('/sms', smsRoutes);
 
 jobSMS.start(pool);
 

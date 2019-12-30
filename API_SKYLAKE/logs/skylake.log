@@ -1,0 +1,22 @@
+[2019-12-30T13:58:16.157] [INFO] skylake - Empty value
+[2019-12-30T13:58:21.213] [INFO] skylake - Empty value
+[2019-12-30T13:58:26.238] [INFO] skylake - Empty value
+[2019-12-30T13:58:31.265] [INFO] skylake - Empty value
+[2019-12-30T13:58:36.311] [INFO] skylake - Empty value
+[2019-12-30T13:58:41.354] [INFO] skylake - Empty value
+[2019-12-30T13:58:46.376] [INFO] skylake - Empty value
+[2019-12-30T13:58:51.400] [INFO] skylake - Empty value
+[2019-12-30T13:58:56.441] [INFO] skylake - Empty value
+[2019-12-30T13:59:01.469] [INFO] skylake - Empty value
+[2019-12-30T13:59:06.493] [INFO] skylake - Empty value
+[2019-12-30T13:59:11.522] [INFO] skylake - Empty value
+[2019-12-30T13:59:16.544] [INFO] skylake - Empty value
+[2019-12-30T13:59:21.578] [INFO] skylake - Empty value
+[2019-12-30T13:59:26.603] [INFO] skylake - Empty value
+[2019-12-30T13:59:31.625] [INFO] skylake - Empty value
+[2019-12-30T13:59:36.653] [INFO] skylake - Empty value
+[2019-12-30T13:59:41.681] [INFO] skylake - Empty value
+[2019-12-30T13:59:46.704] [INFO] skylake - Empty value
+[2019-12-30T13:59:51.861] [INFO] skylake - -- SEND SMS : PHONE [0378246333] MESSAGE [xin chao]
+[2019-12-30T13:59:51.916] [INFO] skylake - Current date : 2019-12-30 13:05:00
+[2019-12-30T13:59:51.936] [INFO] skylake - UPDATE skylakecc_erp.sms_msg SET STATUS = 3, RSLT = 06, RSLTDATE = ? WHERE MSGKEY = ? AND PHONE = ?2019-12-30 13:05:00-13-0378246333

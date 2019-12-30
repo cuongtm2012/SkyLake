@@ -1,9 +1,9 @@
 var config = {
   database: {
-    host: '192.168.1.5',
+    host: '1.55.215.214',
     user: 'skylakecc',
     password: 'skylakeccerp',
-    port: 3307,
+    port: 3969,
     database: 'skylakecc_erp'
   },
   TOKEN: {
@@ -18,19 +18,19 @@ var config = {
   SEND_SMS: {
     URL: 'http://app.sms.fpt.net/api/push-brandname-otp',
     SESSION_ID: 'abcde',
-    BRAND_NAME: 'skylakegolf'
+    BRAND_NAME: 'SKYLAKEGOLF'
   },
   SEND_CREATE_CAMPAIN: {
     URL: 'http://app.sms.fpt.net/api/create-campaign',
     SESSION_ID: 'abcde',
-    BRAND_NAME: 'skylakegolf',
+    BRAND_NAME: 'SKYLAKEGOLF',
     CAMPAIN_NAME: 'QC_SKYLAKE',
     QUOTA: 1
   },
   SEND_SMS_QC: {
     URL: 'http://app.sms.fpt.net/api/push-brandname-ads',
     SESSION_ID: 'abcde',
-    BRAND_NAME: 'skylakegolf'
+    BRAND_NAME: 'SKYLAKEGOLF'
   }
 };
 

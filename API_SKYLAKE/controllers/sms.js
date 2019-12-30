@@ -2,6 +2,12 @@ var config = require('../config/config');
 var axios = require('axios');
 var dateutil = require('../util/dateUtil');
 var validate = require('../util/validation');
+var log4js = require('log4js');
+log4js.configure({
+  appenders: { 'file': { type: 'file', filename: 'logs/skylake.log' } },
+  categories: { default: { appenders: ['file'], level: 'debug' } }
+});
+var logger = log4js.getLogger('skylake');
 
 module.exports = class smsDb {
   // Cron job notification
@@ -18,12 +24,12 @@ module.exports = class smsDb {
           connection.release();
         }
         if (err) {
-          console.log(err);
+          logger.info(err);
           onComplete(0, 0);
           return;
         }
         if (result.length < 1) {
-          console.log('Empty value');
+          logger.info('Empty value');
           onComplete(0, 0);
           return;
         } else {
@@ -69,7 +75,7 @@ module.exports = class smsDb {
                 var msgkey = sms.MSGKEY;
                 var phone = sms.PHONE;
                 var msg = sms.MSG;
-                console.log('-- SEND SMS : PHONE [' + phone + '] MESSAGE [' + msg + ']');
+                logger.info('-- SEND SMS : PHONE [' + phone + '] MESSAGE [' + msg + ']');
                 if (phone !== null && phone !== undefined && phone.length !== 0 && !validate.isEmptyStr(msg)) {
                   // Send SMS
                   var body_sms = {
@@ -82,7 +88,8 @@ module.exports = class smsDb {
                   axios.post(config.SEND_SMS.URL, body_sms)
                     .then(function (response) {
                       var rsldate = dateutil.dateYYYYMMDDHHmmss();
-                      console.log('Current date : ' + rsldate);
+                      logger.info('Current date : ' + rsldate);
+
                       var table_monthly = dateutil.dateYYYYMM();
                       // update SMSMSG table
                       connection.query('UPDATE skylakecc_erp.sms_msg SET STATUS = 3, RSLT = 06, RSLTDATE = ? WHERE MSGKEY = ? AND PHONE = ?',
@@ -92,24 +99,24 @@ module.exports = class smsDb {
                             connection.release();
                           }
                           if (err) {
-                            console.log(err);
+                            logger.info(err);
                             return;
                           }
                           if (result) {
-                            console.log('UPDATE skylakecc_erp.sms_msg SET STATUS = 3, RSLT = 06, RSLTDATE = ? WHERE MSGKEY = ? AND PHONE = ?' + rsldate + '-' + msgkey + '-' + phone);
+                            logger.info('UPDATE skylakecc_erp.sms_msg SET STATUS = 3, RSLT = 06, RSLTDATE = ? WHERE MSGKEY = ? AND PHONE = ?' + rsldate + '-' + msgkey + '-' + phone);
                             connection.query('create table skylakecc_erp.sms_log_' + table_monthly + ' as select * from skylakecc_erp.sms_msg where 1=0;', function (err, result, fields) {
                               if (err) {
-                                console.log('create table skylakecc_erp.sms_log_' + table_monthly + ' as select * from skylakecc_erp.sms_msg where 1=0;' + err);
+                                logger.info('create table skylakecc_erp.sms_log_' + table_monthly + ' as select * from skylakecc_erp.sms_msg where 1=0;' + err);
                               }
                               connection.query('insert into skylakecc_erp.sms_log_' + table_monthly + ' select * from skylakecc_erp.sms_msg WHERE STATUS = 3 AND MSGKEY NOT IN (SELECT MSGKEY FROM skylakecc_erp.sms_log_' + table_monthly + ')', function (err, result, fields) {
                                 if (db._freeConnections.indexOf(connection) < 0) {
                                   connection.release();
                                 }
                                 if (err) {
-                                  console.log(err);
+                                  logger.info(err);
                                   return;
                                 }
-                                console.log('insert into skylakecc_erp.sms_log_' + table_monthly + ' select * from skylakecc_erp.sms_msg WHERE STATUS = 3');
+                                logger.info('insert into skylakecc_erp.sms_log_' + table_monthly + ' select * from skylakecc_erp.sms_msg WHERE STATUS = 3');
                                 // delete data from SMS_MSG
                                 connection.query('DELETE FROM skylakecc_erp.sms_msg WHERE STATUS = 3 AND MSGKEY = ? ', [msgkey], function (err, result, fields) {
                                   count++;
@@ -117,10 +124,10 @@ module.exports = class smsDb {
                                     connection.release();
                                   }
                                   if (err) {
-                                    console.log(err);
+                                    logger.info(err);
                                     return;
                                   }
-                                  console.log('DELETE FROM skylakecc_erp.sms_msg WHERE STATUS = 3 AND MSGKEY = ' + msgkey);
+                                  logger.info('DELETE FROM skylakecc_erp.sms_msg WHERE STATUS = 3 AND MSGKEY = ' + msgkey);
                                   onComplete(count, maxlength);
                                 });
                               });
@@ -129,9 +136,9 @@ module.exports = class smsDb {
                         });
                     })
                     .catch(function (error) {
-                      console.log(error);
+                      logger.info(error);
                       if (error.response) {
-                        console.log(error.response);
+                        logger.info(error.response);
                       }
                       // Update data sms_msg to log table
                       var rsldate = dateutil.dateYYYYMMDDHHmmss();
@@ -143,20 +150,20 @@ module.exports = class smsDb {
                             connection.release();
                           }
                           if (err) {
-                            console.log(err);
+                            logger.info(err);
                             return;
                           }
                           if (result) {
                             connection.query('create table skylakecc_erp.sms_log_' + table_monthly + ' as select * from skylakecc_erp.sms_msg where 1=0;', function (err, result, fields) {
                               if (err) {
-                                console.log('create table skylakecc_erp.sms_log_' + table_monthly + ' as select * from skylakecc_erp.sms_msg where 1=0;' + err);
+                                logger.info('create table skylakecc_erp.sms_log_' + table_monthly + ' as select * from skylakecc_erp.sms_msg where 1=0;' + err);
                               }
                               connection.query('insert into skylakecc_erp.sms_log_' + table_monthly + ' select * from skylakecc_erp.sms_msg WHERE STATUS = 1 AND MSGKEY = ? AND MSGKEY NOT IN (SELECT MSGKEY FROM skylakecc_erp.sms_log_' + table_monthly + ')', [msgkey], function (err, result, fields) {
                                 if (db._freeConnections.indexOf(connection) < 0) {
                                   connection.release();
                                 }
                                 if (err) {
-                                  console.log(err);
+                                  logger.info(err);
                                   return;
                                 }
                                 // delete data from SMS_MSG
@@ -166,7 +173,7 @@ module.exports = class smsDb {
                                     connection.release();
                                   }
                                   if (err) {
-                                    console.log(err);
+                                    logger.info(err);
                                     return;
                                   }
                                   onComplete(count, maxlength);
@@ -188,20 +195,20 @@ module.exports = class smsDb {
                         connection.release();
                       }
                       if (err) {
-                        console.log(err);
+                        logger.info(err);
                         return;
                       }
                       if (result) {
                         connection.query('create table skylakecc_erp.sms_log_' + table_monthly + ' as select * from skylakecc_erp.sms_msg where 1=0;', function (err, result, fields) {
                           if (err) {
-                            console.log('create table skylakecc_erp.sms_log_' + table_monthly + ' as select * from skylakecc_erp.sms_msg where 1=0;' + err);
+                            logger.info('create table skylakecc_erp.sms_log_' + table_monthly + ' as select * from skylakecc_erp.sms_msg where 1=0;' + err);
                           }
                           connection.query('insert into skylakecc_erp.sms_log_' + table_monthly + ' select * from skylakecc_erp.sms_msg WHERE STATUS = 1 AND MSGKEY = ? AND MSGKEY NOT IN (SELECT MSGKEY FROM skylakecc_erp.sms_log_' + table_monthly + ')', [msgkey], function (err, result, fields) {
                             if (db._freeConnections.indexOf(connection) < 0) {
                               connection.release();
                             }
                             if (err) {
-                              console.log(err);
+                              logger.info(err);
                               return;
                             }
                             // delete data from SMS_MSG
@@ -211,7 +218,7 @@ module.exports = class smsDb {
                                 connection.release();
                               }
                               if (err) {
-                                console.log(err);
+                                logger.info(err);
                                 return;
                               }
                               onComplete(count, maxlength);
@@ -224,7 +231,7 @@ module.exports = class smsDb {
                 }
               });
             }).catch(function (error) {
-              console.log(error);
+              logger.info(error);
               onComplete(0, 0);
             });
         } else {
@@ -254,7 +261,7 @@ module.exports = class smsDb {
                 var phone = sms.PHONE;
                 var msg = sms.MSG;
                 var reqdate = dateutil.dateYYYYMMDDHHmm(sms.REQDATE);
-                console.log('-- GET TOKEN : PHONE [' + phone + '] MESSAGE [' + msg + '] REQDATE' + reqdate);
+                logger.info('-- GET TOKEN : PHONE [' + phone + '] MESSAGE [' + msg + '] REQDATE' + reqdate);
                 if (phone !== null && phone !== undefined && phone.length !== 0 && !validate.isEmptyStr(msg)) {
                   // Send SMS
                   var body_create_campain = {
@@ -266,14 +273,12 @@ module.exports = class smsDb {
                     "Quota": config.SEND_CREATE_CAMPAIN.QUOTA,
                     "Message": Buffer.from(msg).toString('base64')
                   };
-                  console.log(body_create_campain);
-
-
+                  logger.info(body_create_campain);
                   axios.post(config.SEND_CREATE_CAMPAIN.URL, body_create_campain)
                     .then(function (response) {
                       var campain_code = response.data.CampaignCode;
                       if (campain_code != null && campain_code != undefined) {
-                        console.log('CAMPAIN CODE : ' + campain_code);
+                        logger.info('CAMPAIN CODE : ' + campain_code);
 
                         var body_send_qc = {
                           "access_token": fpt_token,
@@ -283,10 +288,10 @@ module.exports = class smsDb {
                         };
                         axios.post(config.SEND_SMS_QC.URL, body_send_qc)
                           .then(function (response) {
-                            console.log('SEND MESSAGE : ' + response.data.NumMessageSent);
+                            logger.info('SEND MESSAGE : ' + response.data.NumMessageSent);
                             if (response.data.NumMessageSent > 0) {
                               var rsldate = dateutil.dateYYYYMMDDHHmmss();
-                              console.log('Current date : ' + rsldate);
+                              logger.info('Current date : ' + rsldate);
                               var table_monthly = dateutil.dateYYYYMM();
 
                               // update SMSMSG table
@@ -296,38 +301,38 @@ module.exports = class smsDb {
                                     connection.release();
                                   }
                                   if (err) {
-                                    console.log(err);
+                                    logger.info(err);
                                     return;
                                   }
                                   if (result.affectedRows > 0) {
-                                    console.log('UPDATE skylakecc_erp.sms_msg SET STATUS = 3, RSLT = 06, RSLTDATE = ? WHERE MSGKEY = ? AND PHONE = ?' + rsldate + '-' + msgkey + '-' + phone);
+                                    logger.info('UPDATE skylakecc_erp.sms_msg SET STATUS = 3, RSLT = 06, RSLTDATE = ? WHERE MSGKEY = ? AND PHONE = ?' + rsldate + '-' + msgkey + '-' + phone);
                                     // insert into SMS monthly
                                     connection.query('create table skylakecc_erp.sms_log_' + table_monthly + ' as select * from skylakecc_erp.sms_msg where 1=0;', function (err, result, fields) {
                                       if (db._freeConnections.indexOf(connection) < 0) {
                                         connection.release();
                                       }
                                       if (err) {
-                                        console.log('create table skylakecc_erp.sms_log_' + table_monthly + ' as select * from skylakecc_erp.sms_msg where 1=0;' + err);
+                                        logger.info('create table skylakecc_erp.sms_log_' + table_monthly + ' as select * from skylakecc_erp.sms_msg where 1=0;' + err);
                                       }
                                       connection.query('insert into skylakecc_erp.sms_log_' + table_monthly + ' select * from skylakecc_erp.sms_msg WHERE STATUS = 3 AND MSGKEY = ? AND MSGKEY NOT IN (SELECT MSGKEY FROM skylakecc_erp.sms_log_' + table_monthly + ')', [msgkey], function (err, result, fields) {
                                         if (db._freeConnections.indexOf(connection) < 0) {
                                           connection.release();
                                         }
                                         if (err) {
-                                          console.log(err);
+                                          logger.info(err);
                                           return;
                                         }
-                                        console.log('insert into skylakecc_erp.sms_log_' + table_monthly + ' select * from skylakecc_erp.sms_msg WHERE STATUS = 3 AND MSGKEY = ? [' + msgkey + ']');
+                                        logger.info('insert into skylakecc_erp.sms_log_' + table_monthly + ' select * from skylakecc_erp.sms_msg WHERE STATUS = 3 AND MSGKEY = ? [' + msgkey + ']');
                                         // delete data from SMS_MSG
                                         connection.query('DELETE FROM skylakecc_erp.sms_msg WHERE STATUS = 3 AND MSGKEY = ? ', [msgkey], function (err, result, fields) {
                                           if (db._freeConnections.indexOf(connection) < 0) {
                                             connection.release();
                                           }
                                           if (err) {
-                                            console.log(err);
+                                            logger.info(err);
                                             return;
                                           }
-                                          console.log('DELETE FROM skylakecc_erp.sms_msg WHERE STATUS = 3 AND MSGKEY = ? [' + msgkey + '] ');
+                                          logger.info('DELETE FROM skylakecc_erp.sms_msg WHERE STATUS = 3 AND MSGKEY = ? [' + msgkey + '] ');
                                         });
                                       });
                                     });
@@ -339,9 +344,9 @@ module.exports = class smsDb {
                       }
                     })
                     .catch(function (error) {
-                      console.log(error);
+                      logger.info(error);
                       if (error.response) {
-                        console.log(error.response);
+                        logger.info(error.response);
                       }
                       // Update data sms_msg to log table
                       var rsldate = dateutil.dateYYYYMMDDHHmmss();
@@ -353,20 +358,20 @@ module.exports = class smsDb {
                             connection.release();
                           }
                           if (err) {
-                            console.log(err);
+                            logger.info(err);
                             return;
                           }
                           if (result) {
                             connection.query('create table skylakecc_erp.sms_log_' + table_monthly + ' as select * from skylakecc_erp.sms_msg where 1=0;', function (err, result, fields) {
                               if (err) {
-                                console.log('create table skylakecc_erp.sms_log_' + table_monthly + ' as select * from skylakecc_erp.sms_msg where 1=0;' + err);
+                                logger.info('create table skylakecc_erp.sms_log_' + table_monthly + ' as select * from skylakecc_erp.sms_msg where 1=0;' + err);
                               }
                               connection.query('insert into skylakecc_erp.sms_log_' + table_monthly + ' select * from skylakecc_erp.sms_msg WHERE STATUS = 1 AND MSGKEY = ?  AND MSGKEY NOT IN (SELECT MSGKEY FROM skylakecc_erp.sms_log_' + table_monthly + ')', [msgkey], function (err, result, fields) {
                                 if (db._freeConnections.indexOf(connection) < 0) {
                                   connection.release();
                                 }
                                 if (err) {
-                                  console.log(err);
+                                  logger.info(err);
                                   return;
                                 }
                                 // delete data from SMS_MSG
@@ -376,7 +381,7 @@ module.exports = class smsDb {
                                     connection.release();
                                   }
                                   if (err) {
-                                    console.log(err);
+                                    logger.info(err);
                                     return;
                                   }
                                   onComplete(count, maxlength);
@@ -398,20 +403,20 @@ module.exports = class smsDb {
                         connection.release();
                       }
                       if (err) {
-                        console.log(err);
+                        logger.info(err);
                         return;
                       }
                       if (result) {
                         connection.query('create table skylakecc_erp.sms_log_' + table_monthly + ' as select * from skylakecc_erp.sms_msg where 1=0;', function (err, result, fields) {
                           if (err) {
-                            console.log('create table skylakecc_erp.sms_log_' + table_monthly + ' as select * from skylakecc_erp.sms_msg where 1=0;' + err);
+                            logger.info('create table skylakecc_erp.sms_log_' + table_monthly + ' as select * from skylakecc_erp.sms_msg where 1=0;' + err);
                           }
                           connection.query('insert into skylakecc_erp.sms_log_' + table_monthly + ' select * from skylakecc_erp.sms_msg WHERE STATUS = 1 AND MSGKEY = ? AND MSGKEY NOT IN (SELECT MSGKEY FROM skylakecc_erp.sms_log_' + table_monthly + ')', [msgkey], function (err, result, fields) {
                             if (db._freeConnections.indexOf(connection) < 0) {
                               connection.release();
                             }
                             if (err) {
-                              console.log(err);
+                              logger.info(err);
                               return;
                             }
                             // delete data from SMS_MSG
@@ -421,7 +426,7 @@ module.exports = class smsDb {
                                 connection.release();
                               }
                               if (err) {
-                                console.log(err);
+                                logger.info(err);
                                 return;
                               }
                               onComplete(count, maxlength);
@@ -434,7 +439,7 @@ module.exports = class smsDb {
                 }
               });
             }).catch(function (error) {
-              console.log(error);
+              logger.info(error);
               onComplete(0, 0);
             });
         } else {
