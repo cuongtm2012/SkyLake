@@ -74,7 +74,6 @@ module.exports = class smsDb {
                 var msgkey = sms.MSGKEY;
                 var phone = sms.PHONE;
                 var msg = sms.MSG;
-                logger.info('-- SEND SMS : PHONE [' + phone + '] MESSAGE [' + msg + ']');
                 if (phone !== null && phone !== undefined && phone.length !== 0 && !validate.isEmptyStr(msg)) {
                   // Send SMS
                   var body_sms = {
@@ -87,8 +86,6 @@ module.exports = class smsDb {
                   axios.post(config.SEND_SMS.URL, body_sms)
                     .then(function (response) {
                       var rsldate = dateutil.dateYYYYMMDDHHmmss();
-                      logger.info('Current date : ' + rsldate);
-
                       var table_monthly = dateutil.dateYYYYMM();
                       // update SMSMSG table
                       connection.query('UPDATE skylakecc_erp.sms_msg SET STATUS = 3, RSLT = 06, RSLTDATE = ? WHERE MSGKEY = ? AND PHONE = ?',
@@ -102,7 +99,6 @@ module.exports = class smsDb {
                             return;
                           }
                           if (result) {
-                            logger.info('UPDATE skylakecc_erp.sms_msg SET STATUS = 3, RSLT = 06, RSLTDATE = ? WHERE MSGKEY = ? AND PHONE = ?' + rsldate + '-' + msgkey + '-' + phone);
                             connection.query('create table skylakecc_erp.sms_log_' + table_monthly + ' as select * from skylakecc_erp.sms_msg where 1=0;', function (err, result, fields) {
                               if (err) {
                                 logger.info('create table skylakecc_erp.sms_log_' + table_monthly + ' as select * from skylakecc_erp.sms_msg where 1=0;' + err);
@@ -115,7 +111,6 @@ module.exports = class smsDb {
                                   logger.info(err);
                                   return;
                                 }
-                                logger.info('insert into skylakecc_erp.sms_log_' + table_monthly + ' select * from skylakecc_erp.sms_msg WHERE STATUS = 3');
                                 // delete data from SMS_MSG
                                 connection.query('DELETE FROM skylakecc_erp.sms_msg WHERE STATUS = 3 AND MSGKEY = ? ', [msgkey], function (err, result, fields) {
                                   count++;
@@ -126,7 +121,6 @@ module.exports = class smsDb {
                                     logger.info(err);
                                     return;
                                   }
-                                  logger.info('DELETE FROM skylakecc_erp.sms_msg WHERE STATUS = 3 AND MSGKEY = ' + msgkey);
                                   onComplete(count, maxlength);
                                 });
                               });
@@ -135,7 +129,6 @@ module.exports = class smsDb {
                         });
                     })
                     .catch(function (error) {
-                      logger.info(error);
                       if (error.response) {
                         logger.info(error.response);
                       }
@@ -260,7 +253,6 @@ module.exports = class smsDb {
                 var phone = sms.PHONE;
                 var msg = sms.MSG;
                 var reqdate = dateutil.dateYYYYMMDDHHmm(sms.REQDATE);
-                logger.info('-- GET TOKEN : PHONE [' + phone + '] MESSAGE [' + msg + '] REQDATE' + reqdate);
                 if (phone !== null && phone !== undefined && phone.length !== 0 && !validate.isEmptyStr(msg)) {
                   // Send SMS
                   var body_create_campain = {
@@ -272,13 +264,10 @@ module.exports = class smsDb {
                     "Quota": config.SEND_CREATE_CAMPAIN.QUOTA,
                     "Message": Buffer.from(msg).toString('base64')
                   };
-                  logger.info(body_create_campain);
                   axios.post(config.SEND_CREATE_CAMPAIN.URL, body_create_campain)
                     .then(function (response) {
                       var campain_code = response.data.CampaignCode;
                       if (campain_code != null && campain_code != undefined) {
-                        logger.info('CAMPAIN CODE : ' + campain_code);
-
                         var body_send_qc = {
                           "access_token": fpt_token,
                           "session_id": config.SEND_SMS_QC.SESSION_ID,
@@ -287,10 +276,8 @@ module.exports = class smsDb {
                         };
                         axios.post(config.SEND_SMS_QC.URL, body_send_qc)
                           .then(function (response) {
-                            logger.info('SEND MESSAGE : ' + response.data.NumMessageSent);
                             if (response.data.NumMessageSent > 0) {
                               var rsldate = dateutil.dateYYYYMMDDHHmmss();
-                              logger.info('Current date : ' + rsldate);
                               var table_monthly = dateutil.dateYYYYMM();
 
                               // update SMSMSG table
@@ -304,7 +291,6 @@ module.exports = class smsDb {
                                     return;
                                   }
                                   if (result.affectedRows > 0) {
-                                    logger.info('UPDATE skylakecc_erp.sms_msg SET STATUS = 3, RSLT = 06, RSLTDATE = ? WHERE MSGKEY = ? AND PHONE = ?' + rsldate + '-' + msgkey + '-' + phone);
                                     // insert into SMS monthly
                                     connection.query('create table skylakecc_erp.sms_log_' + table_monthly + ' as select * from skylakecc_erp.sms_msg where 1=0;', function (err, result, fields) {
                                       if (db._freeConnections.indexOf(connection) < 0) {
@@ -321,7 +307,6 @@ module.exports = class smsDb {
                                           logger.info(err);
                                           return;
                                         }
-                                        logger.info('insert into skylakecc_erp.sms_log_' + table_monthly + ' select * from skylakecc_erp.sms_msg WHERE STATUS = 3 AND MSGKEY = ? [' + msgkey + ']');
                                         // delete data from SMS_MSG
                                         connection.query('DELETE FROM skylakecc_erp.sms_msg WHERE STATUS = 3 AND MSGKEY = ? ', [msgkey], function (err, result, fields) {
                                           if (db._freeConnections.indexOf(connection) < 0) {
@@ -331,7 +316,6 @@ module.exports = class smsDb {
                                             logger.info(err);
                                             return;
                                           }
-                                          logger.info('DELETE FROM skylakecc_erp.sms_msg WHERE STATUS = 3 AND MSGKEY = ? [' + msgkey + '] ');
                                         });
                                       });
                                     });
@@ -343,7 +327,6 @@ module.exports = class smsDb {
                       }
                     })
                     .catch(function (error) {
-                      logger.info(error);
                       if (error.response) {
                         logger.info(error.response);
                       }
